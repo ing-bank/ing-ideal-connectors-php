@@ -471,12 +471,40 @@ class XMLSecurityKey {
         return $decrypted;
     }
 
+    function custom_openssl_sign($data, &$signature, $priv_key_id, $signature_alg = 'sha256WithRSAEncryption') {
+        $pinfo = openssl_pkey_get_details($priv_key_id);
+        $hash = hash('sha256', $data);
+        $t = '3031300d060960864801650304020105000420'; # sha256
+        $t .= $hash;
+        $pslen = $pinfo['bits']/8 - (strlen($t)/2 + 3);
+
+        $eb = '0001' . str_repeat('FF', $pslen) . '00' . $t;
+        $eb = pack('H*', $eb);
+
+        return openssl_private_encrypt($eb, $signature, $priv_key_id, OPENSSL_NO_PADDING);
+    }
+
+    function custom_openssl_verify ($data, &$signature, $priv_key_id, $signature_alg = 'sha256WithRSAEncryption') {
+        $pinfo = openssl_pkey_get_details($priv_key_id);
+        $hash = hash('sha256', $data);
+        $t = '3031300d060960864801650304020105000420'; # sha256
+        $t .= $hash;
+        $pslen = $pinfo['bits']/8 - (strlen($t)/2 + 3);
+
+        $eb = '0001' . str_repeat('FF', $pslen) . '00' . $t;
+        $eb = pack('H*', $eb);
+
+        return openssl_public_decrypt($eb, $signature, $priv_key_id, OPENSSL_NO_PADDING);
+    }
+
     private function signOpenSSL($data) {
         $algo = OPENSSL_ALGO_SHA1;
         if (!empty($this->cryptParams['digest'])) {
             $algo = $this->cryptParams['digest'];
         }
-        if (!openssl_sign($data, $signature, $this->key, $algo)) {
+        $signature = '';
+
+        if (!$this->custom_openssl_sign($data, $signature, $this->key)) {
             throw new Exception('Failure Signing Data: ' . openssl_error_string() . ' - ' . $algo);
             return;
         }
@@ -488,7 +516,7 @@ class XMLSecurityKey {
         if (!empty($this->cryptParams['digest'])) {
             $algo = $this->cryptParams['digest'];
         }
-        return openssl_verify($data, $signature, $this->key, $algo);
+        return $this->custom_openssl_verify($data, $signature, $this->key);
     }
 
     public function encryptData($data) {
@@ -1770,5 +1798,6 @@ class XMLSecEnc {
         }
         return XMLSecEnc::staticLocateKeyInfo($objBaseKey, $node);
     }
+
 
 }

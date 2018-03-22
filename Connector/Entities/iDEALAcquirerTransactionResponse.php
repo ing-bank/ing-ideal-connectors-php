@@ -1,12 +1,8 @@
 <?php
-namespace iDEALConnector\Entities;
-use DateTime;
-use InvalidArgumentException;
-
 /**
  *
  */
-class AcquirerTransactionResponse extends AbstractResponse
+class iDEALAcquirerTransactionResponse extends iDEALAbstractResponse
 {
     private $acquirerID;
     private $issuerAuthenticationURL;

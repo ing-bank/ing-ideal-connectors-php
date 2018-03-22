@@ -1,12 +1,8 @@
 <?php
-namespace iDEALConnector\Entities;
-
-use InvalidArgumentException;
-
 /**
  * The Transaction description as found in the startTransaction request.
  */
-class Transaction
+class iDEALTransaction
 {
     private $purchaseId;
     private $amount;

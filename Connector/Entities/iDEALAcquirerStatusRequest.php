@@ -1,20 +1,18 @@
 <?php
-namespace iDEALConnector\Entities;
-
-use InvalidArgumentException;
 /**
  *
  */
-class AcquirerStatusRequest extends AbstractRequest
+class iDEALAcquirerStatusRequest extends iDEALAbstractRequest
 {
     private $merchant;
     private $transactionID;
 
     /**
-     * @param Merchant $merchant
+     * @param iDEALMerchant $merchant
      * @param string $transactionID
+     * @throws InvalidArgumentException
      */
-    public function __construct(Merchant $merchant, $transactionID)
+    public function __construct(iDEALMerchant $merchant, $transactionID)
     {
         if(!is_string($transactionID))
             throw new InvalidArgumentException("Parameter 'transactionID' must be of type string.");
@@ -26,7 +24,7 @@ class AcquirerStatusRequest extends AbstractRequest
     }
 
     /**
-     * @return Merchant
+     * @return iDEALMerchant
      */
     public function getMerchant()
     {

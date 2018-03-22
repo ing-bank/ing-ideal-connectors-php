@@ -1,13 +1,8 @@
 <?php
-namespace iDEALConnector\Entities;
-
-use InvalidArgumentException;
-use DateTime;
-
 /**
  *
  */
-class AcquirerStatusResponse extends AbstractResponse
+class iDEALAcquirerStatusResponse extends iDEALAbstractResponse
 {
     private $acquirerID;
     private $transactionID;
@@ -30,6 +25,7 @@ class AcquirerStatusResponse extends AbstractResponse
      * @param string $status
      * @param DateTime $statusTimestamp
      * @param string $transactionID
+     * @throws InvalidArgumentException
      */
     function __construct($acquirerID, $amount, $consumerBIC, $consumerIBAN, $consumerName, DateTime $createdTimestamp, $currency, $status, DateTime $statusTimestamp, $transactionID)
     {

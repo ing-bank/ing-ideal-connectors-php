@@ -1,9 +1,8 @@
 <?php
-namespace iDEALConnector\Exceptions;
 /**
  *  This exception occurs during security checks of transport messages.
  */
-class SecurityException extends ConnectorException
+class iDEALSecurityException extends iDEALConnectorException
 {
     private $xml;
 

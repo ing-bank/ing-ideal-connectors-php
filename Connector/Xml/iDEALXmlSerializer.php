@@ -1,73 +1,50 @@
 <?php
-namespace iDEALConnector\Xml;
 
-use DOMDocument;
-use DOMNodeList;
-use DOMElement;
-use DateTime;
-use DateTimeZone;
-
-use iDEALConnector\Exceptions\iDEALException;
-use iDEALConnector\Exceptions\SerializationException;
-
-use iDEALConnector\Entities\AbstractRequest;
-use iDEALConnector\Entities\DirectoryRequest;
-use iDEALConnector\Entities\AcquirerTransactionRequest;
-use iDEALConnector\Entities\AcquirerStatusRequest;
-use iDEALConnector\Entities\Merchant;
-use iDEALConnector\Entities\Transaction;
-
-use iDEALConnector\Entities\DirectoryResponse;
-use iDEALConnector\Entities\AcquirerTransactionResponse;
-use iDEALConnector\Entities\AcquirerStatusResponse;
-use iDEALConnector\Entities\Country;
-use iDEALConnector\Entities\Issuer;
-
-class XmlSerializer
+class iDEALXmlSerializer
 {
 
     ///Serialize///
 
-    public function serialize(AbstractRequest $input)
+    public function serialize(iDEALAbstractRequest $input)
     {
         $doc = new DOMDocument('1.0', 'utf-8');
 
         $className = get_class($input);
 
-        if ($className === "iDEALConnector\Entities\DirectoryRequest")
+        if ($className === "iDEALDirectoryRequest")
         {
             $element = $doc->createElement("DirectoryReq");
             $this->serializeAbstractRequest($element, $input);
 
-            /* @var $input DirectoryRequest */
+            /* @var $input iDEALDirectoryRequest */
             $this->serializeDirectoryRequest($element, $input);
             $doc->appendChild($element);
         }
-        else if ($className === "iDEALConnector\Entities\AcquirerTransactionRequest")
+        else if ($className === "iDEALAcquirerTransactionRequest")
         {
             $element = $doc->createElement("AcquirerTrxReq");
             $this->serializeAbstractRequest($element, $input);
 
-            /* @var $input AcquirerTransactionRequest */
+            /* @var $input iDEALAcquirerTransactionRequest */
             $this->serializeAcquirerTransactionRequest($element, $input);
             $doc->appendChild($element);
         }
-        else if ($className === "iDEALConnector\Entities\AcquirerStatusRequest")
+        else if ($className === "iDEALAcquirerStatusRequest")
         {
             $element = $doc->createElement("AcquirerStatusReq");
             $this->serializeAbstractRequest($element, $input);
 
-            /* @var $input AcquirerStatusRequest */
+            /* @var $input iDEALAcquirerStatusRequest */
             $this->serializeAcquirerStatusRequest($element, $input);
             $doc->appendChild($element);
         }
         else
-            throw new SerializationException('Given object type could not be serialized.');
+            throw new iDEALSerializationException('Given object type could not be serialized.');
 
         return $doc;
     }
 
-    private function serializeAbstractRequest(DOMElement $element, AbstractRequest $request)
+    private function serializeAbstractRequest(DOMElement $element, iDEALAbstractRequest $request)
     {
         $element->appendChild(new DOMElement("createDateTimestamp", $request->getCreateDateTimestamp()->format("Y-m-d\TH:i:s\Z")));
         $element->setAttribute("version", $request->getVersion());
@@ -75,14 +52,14 @@ class XmlSerializer
         $element->setAttribute("xmlns", "http://www.idealdesk.com/ideal/messages/mer-acq/3.3.1");
     }
 
-    private function serializeDirectoryRequest(DOMElement $element, DirectoryRequest $request)
+    private function serializeDirectoryRequest(DOMElement $element, iDEALDirectoryRequest $request)
     {
         $merchant = $element->ownerDocument->createElement("Merchant");
         $this->serializeMerchant($merchant, $request->getMerchant());
         $element->appendChild($merchant);
     }
 
-    private function serializeAcquirerTransactionRequest(DOMElement $element, AcquirerTransactionRequest $request)
+    private function serializeAcquirerTransactionRequest(DOMElement $element, iDEALAcquirerTransactionRequest $request)
     {
         $item = $element->ownerDocument->createElement("Issuer");
         $item->appendChild(new DOMElement("issuerID", $request->getIssuerID()));
@@ -97,7 +74,7 @@ class XmlSerializer
         $element->appendChild($item);
     }
 
-    private function serializeAcquirerStatusRequest(DOMElement $element, AcquirerStatusRequest $request)
+    private function serializeAcquirerStatusRequest(DOMElement $element, iDEALAcquirerStatusRequest $request)
     {
         $item = $element->ownerDocument->createElement("Merchant");
         $this->serializeMerchant($item, $request->getMerchant());
@@ -108,7 +85,7 @@ class XmlSerializer
         $element->appendChild($item);
     }
 
-    private function serializeMerchant(DOMElement $element, Merchant $merchant, $withUrl = false)
+    private function serializeMerchant(DOMElement $element, iDEALMerchant $merchant, $withUrl = false)
     {
         $element->appendChild(new DOMElement("merchantID", $merchant->getMerchantID()));
         $element->appendChild(new DOMElement("subID", $merchant->getSubID()));
@@ -117,7 +94,7 @@ class XmlSerializer
             $element->appendChild(new DOMElement("merchantReturnURL", $merchant->getMerchantReturnURL()));
     }
 
-    private function serializeTransaction(DOMElement $element, Transaction $transaction)
+    private function serializeTransaction(DOMElement $element, iDEALTransaction $transaction)
     {
         $element->appendChild(new DOMElement("purchaseID", $transaction->getPurchaseId()));
         $element->appendChild(new DOMElement("amount", number_format($transaction->getAmount(), 2, '.', '')));
@@ -137,8 +114,8 @@ class XmlSerializer
 
 
     /**
-     * @param \DOMDocument $xml
-     * @return \iDEALConnector\Entities\AbstractResponse
+     * @param DOMDocument $xml
+     * @return IdealAbstractResponse
      */
     public function deserialize(DOMDocument $xml)
     {
@@ -164,7 +141,7 @@ class XmlSerializer
                 {
                     try
                     {
-                        /* @var $element \DOMElement */
+                        /* @var $element DOMElement */
                         $element = $elements->item(0);
 
                         $code = $element->getElementsByTagName("errorCode")->item(0)->nodeValue;
@@ -182,19 +159,19 @@ class XmlSerializer
                         if ($nodes->length === 1)
                             $consumerMessage = $nodes->item(0)->nodeValue;
                     }
-                    catch(\Exception $e)
+                    catch(Exception $e)
                     {
                         //Pass-through to exception throwing if minimum requirements are not met.
                     }
                 }
 
                 if(is_null($code) || is_null($message))
-                    throw new SerializationException("Invalid format of error response.");
+                    throw new iDEALSerializationException("Invalid format of error response.");
 
                 throw new iDEALException($code, $message, $details, $action, $consumerMessage);
             }
 
-            throw new SerializationException("Error response missing content.");
+            throw new iDEALSerializationException("Error response missing content.");
         }
     }
 
@@ -203,10 +180,10 @@ class XmlSerializer
         $timestamp = $xml->getElementsByTagName("createDateTimestamp");
 
         if ($timestamp->length != 1)
-            throw new SerializationException('Element "createDateTimestamp" should be present once.');
+            throw new iDEALSerializationException('Element "createDateTimestamp" should be present once.');
 
         $timestamp = new DateTime($timestamp->item(0)->nodeValue);
-        $timestamp->setTimezone(new \DateTimeZone('UTC'));
+        $timestamp->setTimezone(new DateTimeZone('UTC'));
 
         if ($xml->tagName === "DirectoryRes")
         {
@@ -221,7 +198,7 @@ class XmlSerializer
             return $this->deserializeAcquirerStatusResponse($xml, $timestamp);
         }
 
-        throw new SerializationException('Could not deserialize response.');
+        throw new iDEALSerializationException('Could not deserialize response.');
     }
 
     private function deserializeDirectoryResponse(DOMElement $xml, DateTime $createdTimestamp)
@@ -256,13 +233,13 @@ class XmlSerializer
                 $id = $this->getFirstValue($issuer, "issuerID","Directory.Country.Issuer.issuerID");
                 $name = $this->getFirstValue($issuer, "issuerName","Directory.Country.Issuer.issuerName");
 
-                array_push($issuers, new \iDEALConnector\Entities\Issuer($id, $name));
+                array_push($issuers, new iDEALIssuer($id, $name));
             }
 
-            array_push($countries, new \iDEALConnector\Entities\Country($names, $issuers));
+            array_push($countries, new iDEALCountry($names, $issuers));
         }
 
-        return new DirectoryResponse($createdTimestamp, $timestamp, $acquirerID, $countries);
+        return new iDEALDirectoryResponse($createdTimestamp, $timestamp, $acquirerID, $countries);
     }
 
     private function deserializeAcquirerTransactionResponse(DOMElement $xml, DateTime $createdTimestamp)
@@ -293,7 +270,7 @@ class XmlSerializer
 
         $purchaseID = $this->getFirstValue($node, "purchaseID","Transaction.purchaseID");
 
-        return new AcquirerTransactionResponse(
+        return new iDEALAcquirerTransactionResponse(
             $acquirerID,
             $issuerAuthenticationUrl,
             $purchaseID,
@@ -324,7 +301,7 @@ class XmlSerializer
         $amount = floatval($this->getFirstValue($node, "amount","Transaction.amount", 0));
         $currency = $this->getFirstValue($node, "currency","Transaction.currency", 0);
 
-        return new AcquirerStatusResponse(
+        return new iDEALAcquirerStatusResponse(
             $acquirerID,
             $amount,
             $consumerBIC,
@@ -345,10 +322,10 @@ class XmlSerializer
         $nodes = $element->getElementsByTagName($tag);
 
         if ($occurs === 0 && $nodes->length != 1)
-                throw new SerializationException("Element '$key' should be present once.");
+                throw new iDEALSerializationException("Element '$key' should be present once.");
 
         if ($occurs === 1 && $nodes->length < 1)
-                throw new SerializationException("Element '$key' should be present at least once.");
+                throw new iDEALSerializationException("Element '$key' should be present at least once.");
 
         return $nodes;
     }
@@ -362,10 +339,10 @@ class XmlSerializer
             return null;
 
         if ($occurs === 1 && $nodes->length != 1)
-            throw new SerializationException("Element '$key' should be present once.");
+            throw new iDEALSerializationException("Element '$key' should be present once.");
 
         if ($occurs === -1 && $nodes->length < 1)
-            throw new SerializationException("Element '$key' should be present at least once.");
+            throw new iDEALSerializationException("Element '$key' should be present at least once.");
 
         return $nodes->item(0)->nodeValue;
     }

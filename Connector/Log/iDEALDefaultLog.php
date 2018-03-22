@@ -1,13 +1,6 @@
 <?php
-namespace iDEALConnector\Log;
 
-use DateTime;
-use iDEALConnector\Exceptions\ConnectorException;
-use iDEALConnector\Exceptions\iDEALException;
-use iDEALConnector\Entities\AbstractResponse;
-use iDEALConnector\Entities\AbstractRequest;
-
-class DefaultLog implements IConnectorLog
+class iDEALDefaultLog implements IIdealConnectorLog
 {
     private $logPath;
     private $logLevel;
@@ -18,13 +11,13 @@ class DefaultLog implements IConnectorLog
         $this->logPath = $logPath;
     }
 
-    public function logAPICall($method, AbstractRequest $request)
+    public function logAPICall($method, iDEALAbstractRequest $request)
     {
         if ($this->logLevel === 0)
             $this->log("Entering[".$method."]", $request);
     }
 
-    public function logAPIReturn($method, AbstractResponse $response)
+    public function logAPIReturn($method, iDEALAbstractResponse $response)
     {
         if ($this->logLevel === 0)
             $this->log("Exiting[".$method."]", $response);
@@ -47,7 +40,7 @@ class DefaultLog implements IConnectorLog
         $this->log("ErrorResponse", $exception);
     }
 
-    public function logException(ConnectorException $exception)
+    public function logException(iDEALConnectorException $exception)
     {
         $this->log("Exception", $exception);
     }

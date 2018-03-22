@@ -1,13 +1,6 @@
 <?php
-namespace iDEALConnector\Xml;
 
-use DOMDocument;
-use Exception;
-use XMLSecurityKey;
-use XMLSecurityDSig;
-use iDEALConnector\Exceptions\SecurityException;
-
-class XmlSecurity
+class iDEALXmlSecurity
 {
     public function sign(DOMDocument $doc, $privateCertificatePath, $privateKeyPath, $passphrase)
     {
@@ -35,7 +28,7 @@ class XmlSecurity
         $signature = new XMLSecurityDSig();
         $sig = $signature->locateSignature($doc);
         if (!$sig)
-            throw new SecurityException("Cannot locate Signature Node");
+            throw new iDEALSecurityException("Cannot locate Signature Node");
 
         //$signature->setCanonicalMethod(XMLSecurityDSig::EXC_C14N); //whitespaces are significant
         $signature->canonicalizeSignedInfo();
@@ -46,12 +39,12 @@ class XmlSecurity
         }
         catch(Exception $ex)
         {
-            throw new SecurityException("Reference Validation Failed");
+            throw new iDEALSecurityException("Reference Validation Failed");
         }
 
         $key = $signature->locateKey();
         if (!$key)
-            throw new SecurityException("Cannot locate the key.");
+            throw new iDEALSecurityException("Cannot locate the key.");
 
         $key->loadKey($certificatePath,true);
 
@@ -63,7 +56,7 @@ class XmlSecurity
         $contents = file_get_contents($path);
 
         if (is_null($contents))
-            throw new SecurityException("Empty certificate.");
+            throw new iDEALSecurityException("Empty certificate.");
 
         $contents = str_replace('-----END CERTIFICATE-----', '', str_replace('-----BEGIN CERTIFICATE-----', '', $contents));
         $contents = base64_decode($contents);

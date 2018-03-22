@@ -1,11 +1,9 @@
 <?php
-namespace iDEALConnector\Exceptions;
-
 
 /**
  *  This exception occurs during validation of entities.
  */
-class ValidationException extends ConnectorException
+class iDEALValidationException extends iDEALConnectorException
 {
     function __construct($message)
     {

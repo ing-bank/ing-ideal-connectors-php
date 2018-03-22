@@ -1,11 +1,8 @@
 <?php
-namespace iDEALConnector\Exceptions;
-
-
 /**
  *  This exception occurs during the serialization of entities.
  */
-class SerializationException extends ConnectorException
+class iDEALSerializationException extends iDEALConnectorException
 {
     private $xml;
 

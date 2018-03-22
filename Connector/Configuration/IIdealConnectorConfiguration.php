@@ -1,10 +1,8 @@
 <?php
-namespace iDEALConnector\Configuration;
-
 /**
  *  Implement current interface to create custom configuration providers.
  */
-interface IConnectorConfiguration
+interface IIdealConnectorConfiguration
 {
     /**
      * @return string

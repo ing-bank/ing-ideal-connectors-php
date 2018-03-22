@@ -1,11 +1,8 @@
 <?php
-namespace iDEALConnector\Entities;
-
-use InvalidArgumentException;
 /**
  * The Issuer class specific to the directoryResponse.
  */
-class Issuer
+class iDEALIssuer
 {
     private $id;
     private $name;
@@ -13,6 +10,7 @@ class Issuer
     /**
      * @param string $id
      * @param string $name
+     * @throws InvalidArgumentException
      */
     public function __construct($id, $name)
     {

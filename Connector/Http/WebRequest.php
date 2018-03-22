@@ -1,5 +1,4 @@
 <?php
-namespace iDEALConnector\Http;
 
 class WebRequest
 {

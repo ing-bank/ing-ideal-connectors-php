@@ -1,21 +1,18 @@
 <?php
-namespace iDEALConnector\Entities;
 
-use InvalidArgumentException;
-
-require_once("Issuer.php");
+require_once("iDEALIssuer.php");
 
 /**
  *  The Country class specific to the directoryResponse.
  */
-class Country
+class iDEALCountry
 {
     private $countryNames;
     private $issuers;
 
     /**
      * @param string $countryNames
-     * @param Issuer[] $issuers
+     * @param iDEALIssuer[] $issuers
      * @throws InvalidArgumentException
      */
     public function __construct($countryNames, $issuers)
@@ -39,7 +36,7 @@ class Country
     }
 
     /**
-     * @return Issuer[]
+     * @return iDEALIssuer[]
      */
     public function getIssuers()
     {

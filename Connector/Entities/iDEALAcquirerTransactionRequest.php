@@ -1,12 +1,9 @@
 <?php
-namespace iDEALConnector\Entities;
-
-
-require_once("Transaction.php");
+require_once("iDEALTransaction.php");
 /**
  *
  */
-class AcquirerTransactionRequest extends AbstractRequest
+class iDEALAcquirerTransactionRequest extends iDEALAbstractRequest
 {
     private $issuerID;
     private $merchant;
@@ -14,10 +11,10 @@ class AcquirerTransactionRequest extends AbstractRequest
 
     /**
      * @param string $issuerID
-     * @param Merchant $merchant
-     * @param Transaction $transaction
+     * @param iDEALMerchant $merchant
+     * @param iDEALTransaction $transaction
      */
-    public function __construct($issuerID, Merchant $merchant, Transaction $transaction)
+    public function __construct($issuerID, iDEALMerchant $merchant, iDEALTransaction $transaction)
     {
         parent::__construct();
 
@@ -35,7 +32,7 @@ class AcquirerTransactionRequest extends AbstractRequest
     }
 
     /**
-     * @return Merchant
+     * @return iDEALMerchant
      */
     public function getMerchant()
     {
@@ -43,7 +40,7 @@ class AcquirerTransactionRequest extends AbstractRequest
     }
 
     /**
-     * @return Transaction
+     * @return iDEALTransaction
      */
     public function getTransaction()
     {

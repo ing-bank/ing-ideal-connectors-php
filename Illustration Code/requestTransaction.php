@@ -1,20 +1,7 @@
 <?php
-use iDEALConnector\iDEALConnector;
-use iDEALConnector\Configuration\DefaultConfiguration;
-use iDEALConnector\Exceptions\SerializationException;
-
-use iDEALConnector\Exceptions\SecurityException;
-use iDEALConnector\Exceptions\ValidationException;
-use iDEALConnector\Exceptions\iDEALException;
-
-use iDEALConnector\Entities\Transaction;
-use iDEALConnector\Entities\AcquirerTransactionResponse;
-
-date_default_timezone_set('UTC');
-
 require_once("Connector/iDEALConnector.php");
 
-$config = new DefaultConfiguration("Connector/config.conf");
+$config = new iDEALDefaultConfiguration("Connector/config.conf");
 $actionType = "";
 
 $errorCode = 0;
@@ -64,7 +51,7 @@ if ($actionType == "Request Transaction") {
     {
         $response = $iDEALConnector->startTransaction(
             $issuerId,
-            new Transaction(
+            new IdealTransaction(
                 $amount,
                 $description,
                 $entranceCode,
@@ -76,20 +63,20 @@ if ($actionType == "Request Transaction") {
             $merchantReturnUrl
         );
 
-        /* @var $response AcquirerTransactionResponse */
+        /* @var $response IdealAcquirerTransactionResponse */
         $acquirerID = $response->getAcquirerID();
         $issuerAuthenticationURL = $response->getIssuerAuthenticationURL();
         $transactionID = $response->getTransactionID();
     }
-    catch (SerializationException $ex)
+    catch (iDEALSerializationException $ex)
     {
         echo '<b style="color:red">Serialization:'.$ex->getMessage().'</b>';
     }
-    catch (SecurityException $ex)
+    catch (iDEALSecurityException $ex)
     {
         echo '<b style="color:red">Security:'.$ex->getMessage().'</b>';
     }
-    catch(ValidationException $ex)
+    catch(iDEALValidationException $ex)
     {
         echo '<b style="color:red">Validation:'.$ex->getMessage().'</b>';
     }

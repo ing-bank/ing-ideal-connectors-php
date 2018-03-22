@@ -1,53 +1,39 @@
 <?php
-namespace iDEALConnector\Configuration;
-
-use iDEALConnector\Exceptions as AppExceptions;
-use iDEALConnector\Log\LogLevel;
-
 /**
  *
  */
-class DefaultConfiguration implements IConnectorConfiguration
+class iDEALDefaultConfiguration implements IIdealConnectorConfiguration
 {
-    private $certificate = null;//"";
-    private $privateKey = null;//"";
-    private $passphrase = null;//"";
+    private $certificate = "";
+    private $privateKey = "";
+    private $passphrase = "";
 
-    private $acquirerCertificate = null;//"";
+    private $acquirerCertificate = "";
 
-    private $merchantID = null;//"";
-    private $subID = null;//0;
-    private $subIDString = null;//0;
-    private $returnURL = null;//"";
+    private $merchantID = "";
+    private $subID = 0;
+    private $returnURL = "";
 
-    private $expirationPeriod = null;//60;
-    private $expirationPeriodString = null;//
-    private $acquirerDirectoryURL = null;//"";
-    private $acquirerTransactionURL = null;//"";
-    private $acquirerStatusURL = null;//"";
-    private $timeout = null;//10;
-    private $timeoutString = null;//10;
+    private $expirationPeriod = 60;
+    private $acquirerDirectoryURL = "";
+    private $acquirerTransactionURL = "";
+    private $acquirerStatusURL = "";
+    private $timeout = 10;
 
     private $proxy = null;
-    private $proxyUrl = null;//"";
+    private $proxyUrl = "";
 
-    private $logFile = null;//"logs/connector.log";
-    private $logLevel = null;//LogLevel::Error;
-    private $logLevelString = null;//LogLevel::Error;
+    private $logFile = "logs/connector.log";
+    private $logLevel = iDEALLogLevel::Error;
 
-    function __construct($path, $defaults = true)
+    function __construct($path)
     {
-        $this->loadFromFile($path, $defaults);
+        $this->loadFromFile($path);
     }
 
-    private function loadFromFile($path, $defaults)
+    private function loadFromFile($path)
     {
-        $file = @fopen($path,'r');
-
-        if (!$file) {
-            throw new AppExceptions\ConnectorException("The configuration file is missing.");    
-        }
-
+        $file = fopen($path,'r');
         $config_data = array();
 
         if ($file) {
@@ -78,10 +64,7 @@ class DefaultConfiguration implements IConnectorConfiguration
         if(isset($config_data['MERCHANTID']))
             $this->merchantID = $config_data['MERCHANTID'];
         if(isset($config_data['SUBID']))
-        {
             $this->subID = intval($config_data['SUBID']);
-            $this->subIDString = $config_data['SUBID'];
-        }
         if(isset($config_data['MERCHANTRETURNURL']))
             $this->returnURL = $config_data['MERCHANTRETURNURL'];
 
@@ -93,17 +76,13 @@ class DefaultConfiguration implements IConnectorConfiguration
             $this->acquirerTransactionURL = $config_data['ACQUIRERURL'];
         }
         if(isset($config_data['ACQUIRERTIMEOUT']))
-        {
             $this->timeout = intval($config_data['ACQUIRERTIMEOUT']);
-            $this->timeoutString = $config_data['ACQUIRERTIMEOUT'];
-        }
         if(isset($config_data['EXPIRATIONPERIOD']))
         {
             if ($config_data['EXPIRATIONPERIOD'] === "PT1H")
                 $this->expirationPeriod = 60;
             else
             {
-                $this->expirationPeriodString = $config_data['EXPIRATIONPERIOD'];
                 $value = substr($config_data['EXPIRATIONPERIOD'], 2, strlen($config_data['EXPIRATIONPERIOD']) - 3);
                 if (is_numeric($value))
                     $this->expirationPeriod = intval($value);
@@ -133,28 +112,9 @@ class DefaultConfiguration implements IConnectorConfiguration
             $level = $config_data['TRACELEVEL'];
 
             if ($level === "DEBUG")
-                $this->logLevel = LogLevel::Debug;
+                $this->logLevel = iDEALLogLevel::Debug;
             else if ($level === "ERROR")
-                $this->logLevel = LogLevel::Error;
-                $this->logLevelString = $level;
-        }
-        
-        if ($defaults)
-        {
-            if(!isset($config_data['EXPIRATIONPERIOD']))
-                    $this->expirationPeriod = 60;
-            
-            if(!isset($config_data['ACQUIRERTIMEOUT']))
-                    $this->timeout = 10;
-            
-            if(!isset($config_data['SUBID']))
-                $this->subID = 0;
-            
-            if(!isset($config_data['TRACELEVEL']))
-                $this->logLevel = LogLevel::Error;
-            
-            if(isset($config_data['LOGFILE']))
-                $this->logFile = "logs/connector.log";
+                $this->logLevel = iDEALLogLevel::Error;
         }
     }
 
@@ -250,33 +210,4 @@ class DefaultConfiguration implements IConnectorConfiguration
     {
         return $this->logLevel;
     }
-
-    /**
-     * @return string
-     */
-    public function getExpirationPeriodString()
-    {
-        return $this->expirationPeriodString;
-    }
-    
-    /**
-     * @return string
-     */
-    public function getSubIDString() {
-        return $this->subIDString;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTimeoutString() {
-        return $this->timeoutString;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogLevelString() {
-        return $this->logLevelString;
-    }    
 }

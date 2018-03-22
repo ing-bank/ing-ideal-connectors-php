@@ -1,60 +1,34 @@
 <?php
-namespace iDEALConnector;
-require_once("Configuration/IConnectorConfiguration.php");
-require_once("Configuration/DefaultConfiguration.php");
-require_once("Log/IConnectorLog.php");
-require_once("Log/DefaultLog.php");
-require_once("Log/LogLevel.php");
+require_once("Configuration/IIdealConnectorConfiguration.php");
+require_once("Configuration/iDEALDefaultConfiguration.php");
+require_once("Log/IIdealConnectorLog.php");
+require_once("Log/iDEALDefaultLog.php");
+require_once("Log/iDEALLogLevel.php");
 
-require_once("Entities/AbstractRequest.php");
-require_once("Entities/DirectoryRequest.php");
-require_once("Entities/AcquirerTransactionRequest.php");
-require_once("Entities/AcquirerStatusRequest.php");
+require_once("Entities/iDEALAbstractRequest.php");
+require_once("Entities/iDEALDirectoryRequest.php");
+require_once("Entities/iDEALAcquirerTransactionRequest.php");
+require_once("Entities/iDEALAcquirerStatusRequest.php");
 
-require_once("Entities/AbstractResponse.php");
-require_once("Entities/DirectoryResponse.php");
-require_once("Entities/AcquirerTransactionResponse.php");
-require_once("Entities/AcquirerStatusResponse.php");
+require_once("Entities/iDEALAbstractResponse.php");
+require_once("Entities/iDEALDirectoryResponse.php");
+require_once("Entities/iDEALAcquirerTransactionResponse.php");
+require_once("Entities/iDEALAcquirerStatusResponse.php");
 
-require_once('Exceptions/ConnectorException.php');
+require_once('Exceptions/iDEALConnectorException.php');
 require_once('Exceptions/iDEALException.php');
-require_once('Exceptions/SerializationException.php');
-require_once('Exceptions/SecurityException.php');
-require_once('Exceptions/ValidationException.php');
+require_once('Exceptions/iDEALSerializationException.php');
+require_once('Exceptions/iDEALSecurityException.php');
+require_once('Exceptions/iDEALValidationException.php');
 
-require_once("Validation/EntityValidator.php");
+require_once("Validation/iDEALEntityValidator.php");
 
-require_once("Xml/XmlSerializer.php");
-require_once("Xml/XmlSecurity.php");
+require_once("Xml/iDEALXmlSerializer.php");
+require_once("Xml/iDEALXmlSecurity.php");
 
 require_once("Http/WebRequest.php");
 
 require_once("Libraries/xmlseclibs.php");
-
-use DOMDocument;
-
-use iDEALConnector\Configuration\IConnectorConfiguration;
-use iDEALConnector\Configuration\DefaultConfiguration;
-
-use iDEALConnector\Log\IConnectorLog;
-use iDEALConnector\Log\EntityValidator;
-use iDEALConnector\Log\DefaultLog;
-
-use iDEALConnector\Exceptions\iDEALException;
-use iDEALConnector\Exceptions\ValidationException;
-use iDEALConnector\Exceptions\SerializationException;
-use iDEALConnector\Exceptions\SecurityException;
-
-use iDEALConnector\Xml\XmlSerializer;
-use iDEALConnector\Xml\XmlSecurity;
-
-use iDEALConnector\Http\WebRequest;
-
-use iDEALConnector\Entities\AcquirerStatusRequest;
-use iDEALConnector\Entities\DirectoryRequest;
-use iDEALConnector\Entities\AcquirerTransactionRequest;
-use iDEALConnector\Entities\Transaction;
-use iDEALConnector\Entities\Merchant;
 
 /**
  *  iDEALConnector Library v2.0
@@ -71,19 +45,19 @@ class iDEALConnector
         /**
      * Constructs an instance of iDEALConnector.
      *
-     * @param IConnectorConfiguration $configuration An instance of a implementation of IConnectorConfiguration
-     * @param IConnectorLog $log An instance of a implementation of IConnectorLog
+     * @param IIdealConnectorConfiguration $configuration An instance of a implementation of IConnectorConfiguration
+     * @param IIdealConnectorLog $log An instance of a implementation of IConnectorLog
      */
-    public function __construct(IConnectorConfiguration $configuration, IConnectorLog $log)
+    public function __construct(IIdealConnectorConfiguration $configuration, IIdealConnectorLog $log)
     {
         $this->log = $log;
         $this->configuration = $configuration;
 
-        $this->serializer = new XmlSerializer();
-        $this->signer = new XmlSecurity();
-        $this->validator = new EntityValidator();
+        $this->serializer = new iDEALXmlSerializer();
+        $this->signer = new iDEALXmlSecurity();
+        $this->validator = new iDEALEntityValidator();
 
-        $this->merchant = new Merchant($this->configuration->getMerchantID(), $this->configuration->getSubID(), $this->configuration->getMerchantReturnURL());
+        $this->merchant = new iDEALMerchant($this->configuration->getMerchantID(), $this->configuration->getSubID(), $this->configuration->getMerchantReturnURL());
     }
 
     /**
@@ -93,24 +67,24 @@ class iDEALConnector
      */
     public static function getDefaultInstance($configurationPath)
     {
-        $config = new DefaultConfiguration($configurationPath);
-        return new  iDEALConnector($config, new DefaultLog($config->getLogLevel(),$config->getLogFile()));
+        $config = new iDEALDefaultConfiguration($configurationPath);
+        return new  iDEALConnector($config, new iDEALDefaultLog($config->getLogLevel(),$config->getLogFile()));
     }
 
 
     /**
      * Get directory listing.
      *
-     * @return Entities\DirectoryResponse
-     * @throws Exceptions\SerializationException
-     * @throws Exceptions\iDEALException
-     * @throws Exceptions\ValidationException
-     * @throws Exceptions\SecurityException
+     * @return iDEALDirectoryResponse
+     * @throws iDEALSerializationException
+     * @throws iDEALException
+     * @throws iDEALValidationException
+     * @throws iDEALSecurityException
      */
     public function getIssuers()
     {
         try{
-            $request = new DirectoryRequest($this->merchant);
+            $request = new iDEALDirectoryRequest($this->merchant);
 
             $this->log->logAPICall("getIssuers()", $request);
             $this->validator->validate($request);
@@ -127,17 +101,17 @@ class iDEALConnector
             $this->log->logErrorResponse($ex);
             throw $ex;
         }
-        catch(ValidationException $ex)
+        catch(iDEALValidationException $ex)
         {
             $this->log->logException($ex);
             throw $ex;
         }
-        catch(SerializationException $ex)
+        catch(iDEALSerializationException $ex)
         {
             $this->log->logException($ex);
             throw $ex;
         }
-        catch(SecurityException $ex)
+        catch(iDEALSecurityException $ex)
         {
             $this->log->logException($ex);
             throw $ex;
@@ -148,23 +122,23 @@ class iDEALConnector
      * Start a transaction.
      *
      * @param $issuerID
-     * @param Entities\Transaction $transaction
+     * @param iDEALTransaction $transaction
      * @param null $merchantReturnUrl
-     * @throws Exceptions\SerializationException
-     * @throws Exceptions\iDEALException
-     * @throws Exceptions\ValidationException
-     * @throws Exceptions\SecurityException
-     * @return Entities\AcquirerTransactionResponse
+     * @throws iDEALSerializationException
+     * @throws iDEALException
+     * @throws iDEALValidationException
+     * @throws iDEALSecurityException
+     * @return iDEALAcquirerTransactionResponse
      */
-    public function startTransaction($issuerID, Transaction $transaction,  $merchantReturnUrl = null)
+    public function startTransaction($issuerID, iDEALTransaction $transaction,  $merchantReturnUrl = null)
     {
         try{
             $merchant = $this->merchant;
 
             if (!is_null($merchantReturnUrl))
-                $merchant = new Merchant($this->configuration->getMerchantID(), $this->configuration->getSubID(), $merchantReturnUrl);
+                $merchant = new iDEALMerchant($this->configuration->getMerchantID(), $this->configuration->getSubID(), $merchantReturnUrl);
 
-            $request = new AcquirerTransactionRequest($issuerID, $merchant, $transaction);
+            $request = new iDEALAcquirerTransactionRequest($issuerID, $merchant, $transaction);
 
             $this->log->logAPICall("startTransaction()", $request);
             $this->validator->validate($request);
@@ -181,17 +155,17 @@ class iDEALConnector
             $this->log->logErrorResponse($iex);
             throw $iex;
         }
-        catch(ValidationException $ex)
+        catch(iDEALValidationException $ex)
         {
             $this->log->logException($ex);
             throw $ex;
         }
-        catch(SerializationException $ex)
+        catch(iDEALSerializationException $ex)
         {
             $this->log->logException($ex);
             throw $ex;
         }
-        catch(SecurityException $ex)
+        catch(iDEALSecurityException $ex)
         {
             $this->log->logException($ex);
             throw $ex;
@@ -202,16 +176,16 @@ class iDEALConnector
      * Get a transaction status.
      *
      * @param $transactionID
-     * @throws Exceptions\SerializationException
-     * @throws Exceptions\iDEALException
-     * @throws Exceptions\ValidationException
-     * @throws Exceptions\SecurityException
-     * @return Entities\AcquirerStatusResponse
+     * @throws iDEALSerializationException
+     * @throws iDEALException
+     * @throws iDEALValidationException
+     * @throws iDEALSecurityException
+     * @return iDEALAcquirerStatusResponse
      */
     public function getTransactionStatus($transactionID)
     {
         try{
-            $request = new AcquirerStatusRequest($this->merchant, $transactionID);
+            $request = new iDEALAcquirerStatusRequest($this->merchant, $transactionID);
 
             $this->log->logAPICall("startTransaction()", $request);
             $this->validator->validate($request);
@@ -228,17 +202,17 @@ class iDEALConnector
             $this->log->logErrorResponse($iex);
             throw $iex;
         }
-        catch(ValidationException $ex)
+        catch(iDEALValidationException $ex)
         {
             $this->log->logException($ex);
             throw $ex;
         }
-        catch(SerializationException $ex)
+        catch(iDEALSerializationException $ex)
         {
             $this->log->logException($ex);
             throw $ex;
         }
-        catch(SecurityException $ex)
+        catch(iDEALSecurityException $ex)
         {
             $this->log->logException($ex);
             throw $ex;
@@ -273,9 +247,9 @@ class iDEALConnector
             $response = WebRequest::post($url, $request);
 
         $this->log->logResponse($response);
-            
+        
         if(empty($response))
-          throw new SerializationException('Response was empty');
+          throw new iDEALSerializationException('Response was empty');
 
         $doc = new DOMDocument('1.0', 'utf-8');
         $doc->loadXML($response);
@@ -284,7 +258,7 @@ class iDEALConnector
         $verified = $this->signer->verify($doc, $this->configuration->getAcquirerCertificatePath());
 
         if (!$verified)
-            throw new SecurityException('Response message signature check fails.');
+            throw new iDEALSecurityException('Response message signature check fails.');
 
         return $this->serializer->deserialize($doc);
     }

@@ -1,15 +1,10 @@
 <?php
-namespace iDEALConnector\Entities;
-
-use InvalidArgumentException;
-use DateTime;
-
-require_once("Country.php");
+require_once("iDEALCountry.php");
 
 /**
  * The DirectoryResponse object received from the directory request call.
  */
-class DirectoryResponse extends AbstractResponse
+class iDEALDirectoryResponse extends iDEALAbstractResponse
 {
     private $directoryDate;
     private $acquirerID;
@@ -19,7 +14,7 @@ class DirectoryResponse extends AbstractResponse
      * @param DateTime $date
      * @param DateTime $directoryDate
      * @param string $acquirerID
-     * @param Country[] $countries
+     * @param iDEALCountry[] $countries
      * @throws InvalidArgumentException
      */
     public function __construct(DateTime $date, DateTime $directoryDate, $acquirerID, $countries)
@@ -46,7 +41,7 @@ class DirectoryResponse extends AbstractResponse
     }
 
     /**
-     * @return Country[]
+     * @return iDEALCountry[]
      */
     public function getCountries()
     {

@@ -1,12 +1,8 @@
 <?php
-namespace iDEALConnector\Entities;
-
-use DateTime;
-
 /**
  * The abstract used for all request objects.
  */
-abstract class AbstractRequest
+abstract class iDEALAbstractRequest
 {
     private $createDateTimestamp;
 

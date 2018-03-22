@@ -1,11 +1,8 @@
 <?php
-namespace iDEALConnector\Entities;
-
-use InvalidArgumentException;
 /**
  *  The Merchant description.
  */
-class Merchant
+class iDEALMerchant
 {
     private $merchantID;
     private $subID;
@@ -15,6 +12,7 @@ class Merchant
      * @param string $merchantID
      * @param int $subID
      * @param string $merchantReturnURL
+     * @throws InvalidArgumentException
      */
     public function __construct($merchantID, $subID, $merchantReturnURL)
     {

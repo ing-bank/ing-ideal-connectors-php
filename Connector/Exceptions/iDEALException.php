@@ -1,12 +1,8 @@
 <?php
-namespace iDEALConnector\Exceptions;
-
-use ErrorException;
-
 /**
  *  This exception occurs when the Acquirer returns an error message.
  */
-class iDEALException extends ConnectorException
+class iDEALException extends iDEALConnectorException
 {
     private $errorCode;
     private $errorDetail;

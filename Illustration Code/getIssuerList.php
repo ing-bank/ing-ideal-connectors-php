@@ -1,23 +1,8 @@
 <?php
-    
-//error_reporting(E_ALL);
-//ini_set('display_errors', 'On');
-
-use iDEALConnector\iDEALConnector;
-use iDEALConnector\Exceptions\ValidationException;
-use iDEALConnector\Exceptions\SecurityException;
-use iDEALConnector\Exceptions\SerializationException;
-use iDEALConnector\Configuration\DefaultConfiguration;
-
-use iDEALConnector\Exceptions\iDEALException;
-
-use iDEALConnector\Entities\DirectoryResponse;
-
-date_default_timezone_set('UTC');
-
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
 require_once("Connector/iDEALConnector.php");
 
-$config = new DefaultConfiguration("Connector/config.conf");
+$config = new iDEALDefaultConfiguration("Connector/config.conf");
 $errorCode = 0;
 $errorMsg = "";
 $consumerMessage = "";
@@ -38,11 +23,13 @@ if ($actionType == "Get Issuers"){
         $iDEALConnector = iDEALConnector::getDefaultInstance("Connector/config.conf");
         $response = $iDEALConnector->getIssuers();
 
-        /* @var $response DirectoryResponse*/
+        /* @var $response iDEALDirectoryResponse*/
+        /** @var $country iDEALCountry */
         foreach ($response->getCountries() as $country)
         {
             $issuerList .= "<optgroup label=\"" . $country->getCountryNames() . "\">";
 
+            /** @var $issuer iDEALIssuer */
             foreach ($country->getIssuers() as $issuer) {
                 $issuerList .= "<option value=\"" . $issuer->getId() . "\">"
                     . $issuer->getName() . "</option>";
@@ -53,15 +40,15 @@ if ($actionType == "Get Issuers"){
             $responseDatetime = $response->getDirectoryDate();
         }
     }
-    catch (SerializationException $ex)
+    catch (iDEALSerializationException $ex)
     {
         echo '<b style="color:red">Serialization:'.$ex->getMessage().'</b>';
     }
-    catch (SecurityException $ex)
+    catch (iDEALSecurityException $ex)
     {
         echo '<b style="color:red">Security:'.$ex->getMessage().'</b>';
     }
-    catch(ValidationException $ex)
+    catch(iDEALValidationException $ex)
     {
         echo '<b style="color:red">Validation:'.$ex->getMessage().'</b>';
     }
@@ -76,6 +63,7 @@ if ($actionType == "Get Issuers"){
     catch (Exception $ex)
     {
         echo '<b style="color:red">Exception:'.$ex->getMessage().'</b>';
+        var_dump($ex);
     }
 }
 ?>
