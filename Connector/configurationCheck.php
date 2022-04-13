@@ -11,7 +11,7 @@ $isPhpLowerVersionInstalled = FALSE;
 if (version_compare(phpversion(), '5.3', '<')) {
     $isPhpLowerVersionInstalled = TRUE;     
 } else {
-    require_once("Validation\ConfigurationValidator.php");
+    require_once("Validation/ConfigurationValidator.php");
     $errors = ConfigurationValidator::getConfigFileStatus("config.conf");       
 }
 ?>
